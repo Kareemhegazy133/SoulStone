@@ -24,5 +24,6 @@ void USoulStoneAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (SoulStoneCharacterMovement) {
 		GroundSpeed = UKismetMathLibrary::VSizeXY(SoulStoneCharacterMovement->Velocity);
 		IsFalling = SoulStoneCharacterMovement->IsFalling();
+		CharacterState = SoulStoneCharacter->GetCharacterState();
 	}
 }
