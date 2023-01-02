@@ -12,6 +12,7 @@
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ASoulStoneCharacter::ASoulStoneCharacter()
@@ -200,6 +201,14 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(FKeyAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::FKeyPressed);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Attack);
 		//EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Dodge);
+	}
+}
+
+void ASoulStoneCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponHitBox())
+	{
+		EquippedWeapon->GetWeaponHitBox()->SetCollisionEnabled(CollisionEnabled);
 	}
 }
 

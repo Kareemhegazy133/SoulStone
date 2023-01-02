@@ -41,4 +41,7 @@ private:
 	USceneComponent* HitBoxTraceStart;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* HitBoxTraceEnd;
+
+public:
+	FORCEINLINE UBoxComponent* GetWeaponHitBox() const { return WeaponHitBox; }
 };
