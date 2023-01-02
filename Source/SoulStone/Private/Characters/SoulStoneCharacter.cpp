@@ -57,7 +57,7 @@ void ASoulStoneCharacter::BeginPlay()
 
 void ASoulStoneCharacter::Move(const FInputActionValue& Value)
 {
-	if (ActionState == EActionState::EAS_Attacking) return;
+	if (ActionState != EActionState::EAS_Unoccupied) return;
 
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -84,9 +84,26 @@ void ASoulStoneCharacter::Look(const FInputActionValue& Value)
 void ASoulStoneCharacter::FKeyPressed() 
 {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	if (OverlappingWeapon) {
+	if (OverlappingWeapon) 
+	{
 		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		OverlappingItem = nullptr;
+		EquippedWeapon = OverlappingWeapon;
+	}
+	else 
+	{
+		if (CanDisarm()) {
+			PlayEquipMontage(FName("Unequip"));
+			CharacterState = ECharacterState::ECS_Unequipped;
+			ActionState = EActionState::EAS_EquippingWeapon;
+		}
+
+		else if (CanArm()) {
+			PlayEquipMontage(FName("Equip"));
+			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+			ActionState = EActionState::EAS_EquippingWeapon;
+		}
 	}
 }
 
@@ -105,14 +122,57 @@ bool ASoulStoneCharacter::CanAttack()
 		CharacterState != ECharacterState::ECS_Unequipped;
 }
 
+bool ASoulStoneCharacter::CanDisarm()
+{
+	return ActionState == EActionState::EAS_Unoccupied && 
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+bool ASoulStoneCharacter::CanArm()
+{
+	return ActionState == EActionState::EAS_Unoccupied &&
+		CharacterState == ECharacterState::ECS_Unequipped &&
+		EquippedWeapon;
+}
+
+void ASoulStoneCharacter::Disarm()
+{
+	if (EquippedWeapon) {
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
+	}
+}
+
+void ASoulStoneCharacter::Arm()
+{
+	if (EquippedWeapon) {
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+	}
+}
+
+void ASoulStoneCharacter::FinishEquipping()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
 void ASoulStoneCharacter::PlayAttackMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage) {
+	if (AnimInstance && AttackMontage) 
+	{
 		AnimInstance->Montage_Play(AttackMontage);
 		const int32 RandomSelection = FMath::RandRange(0, AttackMontage->CompositeSections.Num());
 		FName SectionName = FName(AttackMontage->GetSectionName(RandomSelection));
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+	}
+}
+
+void ASoulStoneCharacter::PlayEquipMontage(FName SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EquipMontage) 
+	{
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
 	}
 }
 
