@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Interfaces/HitInterface.h"
 
 AWeapon::AWeapon() 
 {
@@ -70,9 +71,20 @@ void AWeapon::OnHitBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
 
-	FHitResult TraceHits;
+	FHitResult TraceHit;
 
 	UKismetSystemLibrary::BoxTraceSingle(this, Start, End, FVector(5.f, 5.f, 5.f),
 		HitBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, 
-		false, ActorsToIgnore, EDrawDebugTrace::ForDuration, TraceHits, true);
+		false, ActorsToIgnore, EDrawDebugTrace::ForDuration, TraceHit, true);
+
+	if (TraceHit.GetActor())
+	{
+		IHitInterface* HitInterface = Cast<IHitInterface>(TraceHit.GetActor());
+
+		if (HitInterface) 
+		{
+			HitInterface->GetHit(TraceHit.ImpactPoint);
+		}
+	}
+	
 }
