@@ -71,6 +71,11 @@ void AWeapon::OnHitBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
 
+	for (AActor* Actor : IgnoreActors)
+	{
+		ActorsToIgnore.AddUnique(Actor);
+	}
+
 	FHitResult TraceHit;
 
 	UKismetSystemLibrary::BoxTraceSingle(this, Start, End, FVector(5.f, 5.f, 5.f),
@@ -85,6 +90,7 @@ void AWeapon::OnHitBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		{
 			HitInterface->GetHit(TraceHit.ImpactPoint);
 		}
+		IgnoreActors.AddUnique(TraceHit.GetActor());
 	}
 	
 }

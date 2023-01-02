@@ -167,7 +167,7 @@ void ASoulStoneCharacter::PlayAttackMontage()
 	}
 }
 
-void ASoulStoneCharacter::PlayEquipMontage(FName SectionName)
+void ASoulStoneCharacter::PlayEquipMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && EquipMontage) 
@@ -209,6 +209,7 @@ void ASoulStoneCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type Coll
 	if (EquippedWeapon && EquippedWeapon->GetWeaponHitBox())
 	{
 		EquippedWeapon->GetWeaponHitBox()->SetCollisionEnabled(CollisionEnabled);
+		EquippedWeapon->IgnoreActors.Empty();
 	}
 }
 
