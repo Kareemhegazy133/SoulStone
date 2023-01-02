@@ -80,7 +80,7 @@ void AWeapon::OnHitBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 
 	UKismetSystemLibrary::BoxTraceSingle(this, Start, End, FVector(5.f, 5.f, 5.f),
 		HitBoxTraceStart->GetComponentRotation(), ETraceTypeQuery::TraceTypeQuery1, 
-		false, ActorsToIgnore, EDrawDebugTrace::ForDuration, TraceHit, true);
+		false, ActorsToIgnore, EDrawDebugTrace::None, TraceHit, true);
 
 	if (TraceHit.GetActor())
 	{
