@@ -31,10 +31,7 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetHealthPercent(1.f);
-	}
+	
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
@@ -112,5 +109,19 @@ void AEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 		Section = FName("FromRight");
 	}
 	PlayHitReactMontage(Section);
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (Attributes)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+		if (HealthBarWidget)
+		{
+			HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+		}
+	}
+
+	return DamageAmount;
 }
 
