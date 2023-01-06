@@ -11,6 +11,7 @@
 class UAnimMontage;
 class UAttributeComponent;
 class UHealthBarComponent;
+class UPawnSensingComponent;
 
 UCLASS()
 class SOULSTONE_API AEnemy : public ACharacter, public IHitInterface
@@ -45,6 +46,9 @@ protected:
 	void MoveToTarget(AActor* Target);
 	AActor* ChoosePatrolTarget();
 
+	UFUNCTION()
+	void PawnSeen(APawn* SeenPawn);
+
 	// Play Montage Functions
 	void PlayHitReactMontage(const FName& SectionName);
 	void PlayDeathMontage();
@@ -66,11 +70,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = VisualEffects)
 	UParticleSystem* HitParticles;
 
+	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAttributeComponent* Attributes;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthBarComponent* HealthBarWidget;
+
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;
 
 	UPROPERTY()
 	AActor* CombatTarget;
@@ -78,6 +86,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 750.f;
 
+	UPROPERTY(EditAnywhere)
+	double AttackRadius = 200.f;
+
+	// Navigation
 	UPROPERTY()
 	class AAIController* EnemyController;
 
@@ -98,4 +110,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float WaitMax = 10.f;
+
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 };

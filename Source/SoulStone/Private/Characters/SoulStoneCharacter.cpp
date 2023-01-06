@@ -48,6 +48,8 @@ void ASoulStoneCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Tags.Add(FName("SoulStoneCharacter"));
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) {
