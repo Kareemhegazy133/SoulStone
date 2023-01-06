@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseCharacter.h"
 #include "InputActionValue.h"
 #include "CharacterTypes.h"
 #include "SoulStoneCharacter.generated.h"
@@ -15,10 +15,9 @@ class UCameraComponent;
 class UGroomComponent;
 class AItem;
 class UAnimMontage;
-class AWeapon;
 
 UCLASS()
-class SOULSTONE_API ASoulStoneCharacter : public ACharacter
+class SOULSTONE_API ASoulStoneCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -31,9 +30,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
 protected:
 	// Called when the game starts or when spawned
@@ -67,17 +63,16 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void FKeyPressed();
-	void Attack();
+	virtual	void Attack() override;
 
 	// Play Montage Functions
-	void PlayAttackMontage();
+	virtual void PlayAttackMontage() override;
 
 	void PlayEquipMontage(const FName& SectionName);
 
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
+	virtual void AttackEnd() override;
 
-	bool CanAttack();
+	virtual bool CanAttack() override;
 
 	bool CanDisarm();
 
@@ -112,13 +107,7 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	AWeapon* EquippedWeapon;
-
 	// Animation Montages
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* AttackMontage;
-
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* EquipMontage;
 

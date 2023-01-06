@@ -205,13 +205,3 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		//EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Dodge);
 	}
 }
-
-void ASoulStoneCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
-{
-	if (EquippedWeapon && EquippedWeapon->GetWeaponHitBox())
-	{
-		EquippedWeapon->GetWeaponHitBox()->SetCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->IgnoreActors.Empty();
-	}
-}
-
