@@ -64,10 +64,12 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
-void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	PlayHitSound(ImpactPoint);
-	SpawnHitParticles(ImpactPoint);
+	Super::GetHit_Implementation(ImpactPoint, Hitter);
+
+	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
+	ActionState = EActionState::EAS_HitReaction;
 }
 
 // Called when the game starts or when spawned
@@ -214,6 +216,11 @@ void ASoulStoneCharacter::PlayEquipMontage(const FName& SectionName)
 }
 
 void ASoulStoneCharacter::FinishEquipping()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+void ASoulStoneCharacter::HitReactEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;
 }
