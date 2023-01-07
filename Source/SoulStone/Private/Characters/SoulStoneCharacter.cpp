@@ -12,13 +12,12 @@
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
-#include "Components/BoxComponent.h"
 
 // Sets default values
 ASoulStoneCharacter::ASoulStoneCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -43,11 +42,26 @@ ASoulStoneCharacter::ASoulStoneCharacter()
 	Eyebrows->AttachmentName = FString("head");
 }
 
+// Called to bind functionality to input
+void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
+		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Jump);
+		EnhancedInputComponent->BindAction(FKeyAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::FKeyPressed);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Attack);
+		//EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Dodge);
+	}
+}
+
 // Called when the game starts or when spawned
 void ASoulStoneCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	Tags.Add(FName("SoulStoneCharacter"));
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
@@ -89,34 +103,42 @@ void ASoulStoneCharacter::FKeyPressed()
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon) 
 	{
-		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
-		OverlappingItem = nullptr;
-		EquippedWeapon = OverlappingWeapon;
+		EquipWeapon(OverlappingWeapon);
 	}
 	else 
 	{
 		if (CanDisarm()) {
-			PlayEquipMontage(FName("Unequip"));
-			CharacterState = ECharacterState::ECS_Unequipped;
-			ActionState = EActionState::EAS_EquippingWeapon;
+			Disarm();
 		}
 
 		else if (CanArm()) {
-			PlayEquipMontage(FName("Equip"));
-			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
-			ActionState = EActionState::EAS_EquippingWeapon;
+			Arm();
 		}
 	}
 }
 
 void ASoulStoneCharacter::Attack()
 {
+	Super::Attack();
+
 	if (CanAttack()) {
 		PlayAttackMontage();
 		ActionState = EActionState::EAS_Attacking;
 	}
 	
+}
+
+void ASoulStoneCharacter::EquipWeapon(AWeapon* Weapon)
+{
+	Weapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	OverlappingItem = nullptr;
+	EquippedWeapon = Weapon;
+}
+
+void ASoulStoneCharacter::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 bool ASoulStoneCharacter::CanAttack() 
@@ -140,32 +162,31 @@ bool ASoulStoneCharacter::CanArm()
 
 void ASoulStoneCharacter::Disarm()
 {
-	if (EquippedWeapon) {
-		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
-	}
+	PlayEquipMontage(FName("Unequip"));
+	CharacterState = ECharacterState::ECS_Unequipped;
+	ActionState = EActionState::EAS_EquippingWeapon;
 }
 
 void ASoulStoneCharacter::Arm()
 {
-	if (EquippedWeapon) {
-		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+	PlayEquipMontage(FName("Equip"));
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void ASoulStoneCharacter::AttachWeaponToBack()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("SpineSocket"));
 	}
 }
 
-void ASoulStoneCharacter::FinishEquipping()
+void ASoulStoneCharacter::AttachWeaponToHand()
 {
-	ActionState = EActionState::EAS_Unoccupied;
-}
-
-void ASoulStoneCharacter::PlayAttackMontage()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AttackMontage) 
+	if (EquippedWeapon)
 	{
-		AnimInstance->Montage_Play(AttackMontage);
-		const int32 RandomSelection = FMath::RandRange(0, AttackMontage->CompositeSections.Num());
-		FName SectionName = FName(AttackMontage->GetSectionName(RandomSelection));
-		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
 	}
 }
 
@@ -179,29 +200,7 @@ void ASoulStoneCharacter::PlayEquipMontage(const FName& SectionName)
 	}
 }
 
-void ASoulStoneCharacter::AttackEnd()
+void ASoulStoneCharacter::FinishEquipping()
 {
 	ActionState = EActionState::EAS_Unoccupied;
-}
-
-// Called every frame
-void ASoulStoneCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Jump);
-		EnhancedInputComponent->BindAction(FKeyAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::FKeyPressed);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Attack);
-		//EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Dodge);
-	}
 }

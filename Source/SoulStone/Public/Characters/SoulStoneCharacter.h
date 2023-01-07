@@ -25,9 +25,6 @@ public:
 	// Sets default values for this character's properties
 	ASoulStoneCharacter();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -35,6 +32,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// Input
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* SoulStoneMappingContext;
 
@@ -58,35 +56,32 @@ protected:
 
 	// Called for Movement Input
 	void Move(const FInputActionValue& Value);
-
 	// Called for Look Input
 	void Look(const FInputActionValue& Value);
-
 	void FKeyPressed();
 	virtual	void Attack() override;
 
-	// Play Montage Functions
-	virtual void PlayAttackMontage() override;
-
+	// Combat
+	void EquipWeapon(AWeapon* Weapon);
+	virtual void AttackEnd() override;
+	virtual bool CanAttack() override;
+	bool CanDisarm();
+	bool CanArm();
+	void Disarm();
+	void Arm();
 	void PlayEquipMontage(const FName& SectionName);
 
-	virtual void AttackEnd() override;
-
-	virtual bool CanAttack() override;
-
-	bool CanDisarm();
-
-	bool CanArm();
+	UFUNCTION(BlueprintCallable)
+	void AttachWeaponToBack();
 
 	UFUNCTION(BlueprintCallable)
-	void Disarm();
-
-	UFUNCTION(BlueprintCallable)
-	void Arm();
+	void AttachWeaponToHand();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
-private:	
+
+private:
+	// Character Components
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArm;
 
@@ -102,14 +97,13 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* EquipMontage;
+
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
-
-	// Animation Montages
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* EquipMontage;
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
