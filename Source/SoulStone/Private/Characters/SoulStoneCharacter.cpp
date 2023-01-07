@@ -3,12 +3,13 @@
 
 #include "Characters/SoulStoneCharacter.h"
 #include "Components/InputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
@@ -25,6 +26,12 @@ ASoulStoneCharacter::ASoulStoneCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+
+	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
@@ -57,12 +64,18 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	PlayHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint);
+}
+
 // Called when the game starts or when spawned
 void ASoulStoneCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Tags.Add(FName("SoulStoneCharacter"));
+	Tags.Add(FName("EngageableTarget"));
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 
