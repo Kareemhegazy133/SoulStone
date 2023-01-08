@@ -67,8 +67,6 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	Super::GetHit_Implementation(ImpactPoint, Hitter);
-
-	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
 	ActionState = EActionState::EAS_HitReaction;
 }
 

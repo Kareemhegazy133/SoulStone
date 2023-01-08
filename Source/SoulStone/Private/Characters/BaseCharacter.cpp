@@ -32,6 +32,7 @@ void ABaseCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* H
 
 	PlayHitSound(ImpactPoint);
 	SpawnHitParticles(ImpactPoint);
+	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABaseCharacter::Attack()
@@ -143,6 +144,15 @@ int32 ABaseCharacter::PlayAttackMontage()
 int32 ABaseCharacter::PlayDeathMontage()
 {
 	return PlayRandomMontageSection(DeathMontage, DeathMontageSections);
+}
+
+void ABaseCharacter::StopAttackMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Stop(0.25f, AttackMontage);
+	}
 }
 
 void ABaseCharacter::DisableCapsule()
