@@ -9,10 +9,13 @@
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/AttributeComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
+#include "HUD/SoulStoneHUD.h"
+#include "HUD/SoulStoneOverlay.h"
 
 // Sets default values
 ASoulStoneCharacter::ASoulStoneCharacter()
@@ -64,9 +67,15 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void ASoulStoneCharacter::Jump()
+{
+	if (IsUnoccupied()) Super::Jump();
+}
+
 float ASoulStoneCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	HandleDamage(DamageAmount);
+	SetHUDHealth();
 	return DamageAmount;
 }
 
@@ -82,6 +91,8 @@ void ASoulStoneCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	Tags.Add(FName("EngageableTarget"));
+
+	InitializeSoulStoneOverlay();
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 
@@ -227,4 +238,38 @@ void ASoulStoneCharacter::FinishEquipping()
 void ASoulStoneCharacter::HitReactEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;
+}
+
+bool ASoulStoneCharacter::IsUnoccupied()
+{
+	return ActionState == EActionState::EAS_Unoccupied;
+}
+
+void ASoulStoneCharacter::InitializeSoulStoneOverlay()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		ASoulStoneHUD* SoulStoneHUD = Cast<ASoulStoneHUD>(PlayerController->GetHUD());
+		if (SoulStoneHUD)
+		{
+			SoulStoneOverlay = SoulStoneHUD->GetSoulStoneOverlay();
+			if (SoulStoneOverlay && Attributes)
+			{
+				SoulStoneOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
+				SoulStoneOverlay->SetManaBarPercent(1.f);
+				SoulStoneOverlay->SetGold(0);
+				SoulStoneOverlay->SetSouls(0);
+				SoulStoneOverlay->SetLevel(1);
+			}
+		}
+	}
+}
+
+void ASoulStoneCharacter::SetHUDHealth()
+{
+	if (SoulStoneOverlay && Attributes)
+	{
+		SoulStoneOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
+	}
 }
