@@ -82,7 +82,10 @@ float ASoulStoneCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
 	Super::GetHit_Implementation(ImpactPoint, Hitter);
-	ActionState = EActionState::EAS_HitReaction;
+	if (Attributes && Attributes->GetHealthPercent() > 0.f)
+	{
+		ActionState = EActionState::EAS_HitReaction;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -228,6 +231,14 @@ void ASoulStoneCharacter::PlayEquipMontage(const FName& SectionName)
 		AnimInstance->Montage_Play(EquipMontage);
 		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
 	}
+}
+
+void ASoulStoneCharacter::Die()
+{
+	Super::Die();
+
+	ActionState = EActionState::EAS_Dead;
+	DisableMeshCollision();
 }
 
 void ASoulStoneCharacter::FinishEquipping()
