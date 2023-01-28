@@ -88,6 +88,16 @@ void ASoulStoneCharacter::GetHit_Implementation(const FVector& ImpactPoint, AAct
 	}
 }
 
+void ASoulStoneCharacter::SetOverlappingItem(AItem* Item)
+{
+	OverlappingItem = Item;
+}
+
+void ASoulStoneCharacter::AddSouls(ASoul* Soul)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ASoulStoneCharacter::AddSouls"));
+}
+
 // Called when the game starts or when spawned
 void ASoulStoneCharacter::BeginPlay()
 {
