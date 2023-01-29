@@ -13,9 +13,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
+#include "Items/Soul.h"
+#include "Items/Treasure.h"
 #include "Animation/AnimMontage.h"
 #include "HUD/SoulStoneHUD.h"
 #include "HUD/SoulStoneOverlay.h"
+
 
 // Sets default values
 ASoulStoneCharacter::ASoulStoneCharacter()
@@ -96,6 +99,20 @@ void ASoulStoneCharacter::SetOverlappingItem(AItem* Item)
 void ASoulStoneCharacter::AddSouls(ASoul* Soul)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ASoulStoneCharacter::AddSouls"));
+	if (Attributes && SoulStoneOverlay)
+	{
+		Attributes->AddSouls(Soul->GetSouls());
+		SoulStoneOverlay->SetSouls(Attributes->GetSouls());
+	}
+}
+
+void ASoulStoneCharacter::AddGold(ATreasure* Treasure)
+{
+	if (Attributes && SoulStoneOverlay)
+	{
+		Attributes->AddGold(Treasure->GetGold());
+		SoulStoneOverlay->SetGold(Attributes->GetGold());
+	}
 }
 
 // Called when the game starts or when spawned
