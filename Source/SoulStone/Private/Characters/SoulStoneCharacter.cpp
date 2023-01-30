@@ -24,7 +24,7 @@
 ASoulStoneCharacter::ASoulStoneCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -53,6 +53,15 @@ ASoulStoneCharacter::ASoulStoneCharacter()
 	Eyebrows = CreateDefaultSubobject<UGroomComponent>(TEXT("Eyebrows"));
 	Eyebrows->SetupAttachment(GetMesh());
 	Eyebrows->AttachmentName = FString("head");
+}
+
+void ASoulStoneCharacter::Tick(float DeltaTime)
+{
+	if (Attributes && SoulStoneOverlay)
+	{
+		Attributes->RegenStamina(DeltaTime);
+		SoulStoneOverlay->SetStaminaBarPercent(Attributes->GetStaminaPercent());
+	}
 }
 
 // Called to bind functionality to input
@@ -190,9 +199,14 @@ void ASoulStoneCharacter::Attack()
 
 void ASoulStoneCharacter::Dodge()
 {
-	if (ActionState != EActionState::EAS_Unoccupied) return;
+	if (IsOccupied() || !HasEnoughStamina()) return;
 	PlayDodgeMontage();
 	ActionState = EActionState::EAS_Dodge;
+	if (Attributes && SoulStoneOverlay)
+	{
+		Attributes->UseStamina(Attributes->GetDodgeCost());
+		SoulStoneOverlay->SetStaminaBarPercent(Attributes->GetStaminaPercent());
+	}
 }
 
 void ASoulStoneCharacter::EquipWeapon(AWeapon* Weapon)
@@ -282,6 +296,15 @@ void ASoulStoneCharacter::Die()
 	DisableMeshCollision();
 }
 
+bool ASoulStoneCharacter::HasEnoughStamina()
+{
+	return Attributes && Attributes->GetStamina() > Attributes->GetDodgeCost();
+}
+
+bool ASoulStoneCharacter::IsOccupied()
+{
+	return ActionState != EActionState::EAS_Unoccupied;
+}
 void ASoulStoneCharacter::FinishEquipping()
 {
 	ActionState = EActionState::EAS_Unoccupied;
@@ -309,7 +332,7 @@ void ASoulStoneCharacter::InitializeSoulStoneOverlay()
 			if (SoulStoneOverlay && Attributes)
 			{
 				SoulStoneOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
-				SoulStoneOverlay->SetManaBarPercent(1.f);
+				SoulStoneOverlay->SetStaminaBarPercent(1.f);
 				SoulStoneOverlay->SetGold(0);
 				SoulStoneOverlay->SetSouls(0);
 				SoulStoneOverlay->SetLevel(1);

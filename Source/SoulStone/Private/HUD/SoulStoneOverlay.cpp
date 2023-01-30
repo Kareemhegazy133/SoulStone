@@ -13,11 +13,11 @@ void USoulStoneOverlay::SetHealthBarPercent(float Percent)
 	}
 }
 
-void USoulStoneOverlay::SetManaBarPercent(float Percent)
+void USoulStoneOverlay::SetStaminaBarPercent(float Percent)
 {
-	if (ManaProgressBar)
+	if (StaminaProgressBar)
 	{
-		ManaProgressBar->SetPercent(Percent);
+		StaminaProgressBar->SetPercent(Percent);
 	}
 }
 

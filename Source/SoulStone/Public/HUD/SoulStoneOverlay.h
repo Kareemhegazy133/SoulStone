@@ -16,7 +16,7 @@ class SOULSTONE_API USoulStoneOverlay : public UUserWidget
 public:
 
 	void SetHealthBarPercent(float Percent);
-	void SetManaBarPercent(float Percent);
+	void SetStaminaBarPercent(float Percent);
 	void SetGold(int32 Gold);
 	void SetSouls(int32 Souls);
 	void SetLevel(int32 Level);
@@ -26,7 +26,7 @@ private:
 	class UProgressBar* HealthProgressBar;
 
 	UPROPERTY(meta = (BindWidget))
-	class UProgressBar* ManaProgressBar;
+	class UProgressBar* StaminaProgressBar;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* GoldText;
