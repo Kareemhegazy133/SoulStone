@@ -288,9 +288,9 @@ void ASoulStoneCharacter::PlayEquipMontage(const FName& SectionName)
 	}
 }
 
-void ASoulStoneCharacter::Die()
+void ASoulStoneCharacter::Die_Implementation()
 {
-	Super::Die();
+	Super::Die_Implementation();
 
 	ActionState = EActionState::EAS_Dead;
 	DisableMeshCollision();
