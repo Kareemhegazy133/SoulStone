@@ -19,6 +19,7 @@ class ASoul;
 class ATreasure;
 class UAnimMontage;
 class USoulStoneOverlay;
+class UUserWidget;
 
 UCLASS()
 class SOULSTONE_API ASoulStoneCharacter : public ABaseCharacter, public IPickupInterface
@@ -59,6 +60,9 @@ protected:
 	UInputAction* FKeyAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* EscKeyAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* AttackAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -69,6 +73,7 @@ protected:
 	// Called for Look Input
 	void Look(const FInputActionValue& Value);
 	void FKeyPressed();
+	void EscKeyPressed();
 	virtual	void Attack() override;
 	void Dodge();
 
@@ -101,6 +106,7 @@ protected:
 private:
 	bool IsUnoccupied();
 	void InitializeSoulStoneOverlay();
+	void InitializeSoulStoneUI();
 	void SetHUDHealth();
 
 	// Character Components
@@ -129,6 +135,13 @@ private:
 
 	UPROPERTY()
 	USoulStoneOverlay* SoulStoneOverlay;
+
+	// SoulStone UI
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<UUserWidget> PauseMenuWidget;
+
+	UPROPERTY()
+	UUserWidget* PauseMenuWidgetInstance;
 
 public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }

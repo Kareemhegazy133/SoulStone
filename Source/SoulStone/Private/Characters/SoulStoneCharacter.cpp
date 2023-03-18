@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -18,6 +19,7 @@
 #include "Animation/AnimMontage.h"
 #include "HUD/SoulStoneHUD.h"
 #include "HUD/SoulStoneOverlay.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -76,6 +78,7 @@ void ASoulStoneCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(FKeyAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::FKeyPressed);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Attack);
 		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::Dodge);
+		EnhancedInputComponent->BindAction(EscKeyAction, ETriggerEvent::Triggered, this, &ASoulStoneCharacter::EscKeyPressed);
 	}
 }
 
@@ -132,6 +135,7 @@ void ASoulStoneCharacter::BeginPlay()
 	Tags.Add(FName("EngageableTarget"));
 
 	InitializeSoulStoneOverlay();
+	InitializeSoulStoneUI();
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 
@@ -186,6 +190,32 @@ void ASoulStoneCharacter::FKeyPressed()
 
 		else if (CanArm()) {
 			Arm();
+		}
+	}
+}
+
+void ASoulStoneCharacter::EscKeyPressed()
+{
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		PauseMenuWidgetInstance->RemoveFromParent();
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		{
+			PlayerController->SetShowMouseCursor(false);
+			PlayerController->SetInputMode(FInputModeGameOnly());
+		}
+	}
+	else
+	{
+		PauseMenuWidgetInstance->AddToViewport();
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		{
+			PlayerController->SetShowMouseCursor(true);
+			PlayerController->SetInputMode(FInputModeGameAndUI());
 		}
 	}
 }
@@ -345,6 +375,14 @@ void ASoulStoneCharacter::InitializeSoulStoneOverlay()
 	}
 }
 
+void ASoulStoneCharacter::InitializeSoulStoneUI()
+{
+	if (PauseMenuWidget)
+	{
+		PauseMenuWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), PauseMenuWidget);
+	}
+}
+
 void ASoulStoneCharacter::SetHUDHealth()
 {
 	if (SoulStoneOverlay && Attributes)
@@ -352,3 +390,4 @@ void ASoulStoneCharacter::SetHUDHealth()
 		SoulStoneOverlay->SetHealthBarPercent(Attributes->GetHealthPercent());
 	}
 }
+
