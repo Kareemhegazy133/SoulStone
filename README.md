@@ -1,9 +1,12 @@
 # SoulStone
 
 ## Description
-SoulStone is a Fantasy Action-RPG Style Game currently in development with Unreal Engine 5.1 in C++.
+SoulStone is a Fantasy Action-RPG Style Game currently in development with Unreal Engine 5 in C++.
 
-## Showcase Clips and Screenshots
+### Demo
+Click on the picture to watch the demo video or click here: https://youtu.be/ZWplMFrlLUY
+
+[![IMAGE ALT TEXT](https://github.com/Kareemhegazy133/SoulStone/blob/main/SoulStone.png)](https://youtu.be/ZWplMFrlLUY "Demo Video")
 
 ### Combat Mechanics - Breakable Objects - Spawned Loot Video
 
